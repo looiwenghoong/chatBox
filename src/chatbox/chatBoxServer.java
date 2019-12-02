@@ -11,6 +11,8 @@ package chatbox;
  */
 public class chatBoxServer extends javax.swing.JFrame {
 
+    static ChatBox server;
+    final static int port = 9000;
     /**
      * Creates new form chatBoxClient
      */
@@ -360,6 +362,7 @@ public class chatBoxServer extends javax.swing.JFrame {
                 new chatBoxServer().setVisible(true);
             }
         });
+        server = new ChatBox(port);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
