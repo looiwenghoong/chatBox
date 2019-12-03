@@ -36,28 +36,38 @@ public class Connection implements Runnable {
 
     public void run(){
         String line;
+        running = true;
+        
         try {
             readerIn = new BufferedReader(new InputStreamReader(client.getInputStream()));
             printOutWriter = new PrintWriter(client.getOutputStream(), true);
+            
+            getNumberOfUsers();
+
+            do {            
+                String clientMessage = dis.readUTF();
+                System.out.println(clientMessage);
+                serverReference.broadcastMessage(clientMessage);
+            } while (running);
         } catch (IOException e) {
             System.out.println("in or out failed");
             System.exit(-1);
         }
         
-        String serverMessage = "Welcome to the chat server!!";
-        serverReference.broadcastMessage(serverMessage);
-        getNumberOfUsers();
-        running = true;
-        while(running) {
-            try {
-                line = dis.readUTF();
-                System.out.println(line);
-//                validateMessage(line);
-            } catch (IOException e) {
-                System.out.println("Read failed");
-                System.exit(-1);
-            }
-        }
+        
+        
+        
+        
+//        while(running) {
+//            try {
+//                line = dis.readUTF();
+//                System.out.println(line);
+////                validateMessage(line);
+//            } catch (IOException e) {
+//                System.out.println("Read failed");
+//                System.exit(-1);
+//            }
+//        }
     }
     
     public void getNumberOfUsers() {
