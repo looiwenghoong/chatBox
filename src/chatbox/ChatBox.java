@@ -5,19 +5,25 @@
  */
 package chatbox;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
  *
  * @author ZhengKhai
+ * @author LooiWengHoong
  */
 public class ChatBox {
 
     private ServerSocket server;
     private ArrayList<Connection> list;
+    private Socket s;
+    static int i = 1;
 
     public ChatBox (int port) {
         try {
@@ -29,19 +35,45 @@ public class ChatBox {
             e.printStackTrace();
         }
         list = new ArrayList<Connection>();
+        ArrayList<ClientHandler> userList  = new ArrayList<ClientHandler>();
+//        while(true) {
+//            Connection c = null;
+//            try {
+//                c = new Connection(server.accept(), this);
+//                System.out.println(c);
+//            }
+//            catch (IOException e) {
+//                System.err.println("error setting up new client connection");
+//                e.printStackTrace();
+//            }
+//                Thread t = new Thread(c);
+//                t.start();
+//                list.add(c);
+//            try {
+//                c.messageHandling();
+//            } catch (Exception e) {
+//                System.out.println(e);
+//            }
+//        }
         while(true) {
-            Connection c = null;
             try {
-                c = new Connection(server.accept(), this);
-                System.out.println(c);
+                s = server.accept();
+                System.out.println(s);
+                
+                DataInputStream dis = new DataInputStream(s.getInputStream());
+                DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+                
+                ClientHandler clientHandler = new ClientHandler(s, "Client " + i, dis, dos);
+                
+                Thread t = new Thread(clientHandler);
+                System.out.println("Adding new Client to active client list");
+                userList.add(clientHandler);
+                
+                t.start();
+                i++;
+            } catch (Exception e) {
+                System.out.println(e);
             }
-            catch (IOException e) {
-                System.err.println("error setting up new client conneciton");
-                e.printStackTrace();
-            }
-            Thread t = new Thread(c);
-            t.start();
-            list.add(c);
         }
     }
 

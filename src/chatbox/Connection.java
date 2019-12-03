@@ -1,6 +1,7 @@
 package chatbox;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -17,9 +18,10 @@ public class Connection implements Runnable {
     private int state;
     private Socket client;
     private ChatBox serverReference;
-    private BufferedReader in;
-    private PrintWriter out;
+    private BufferedReader readerIn;
+    private PrintWriter printOut;
     private String username;
+    private DataInputStream dis;
 
     Connection (Socket client, ChatBox serverReference) {
         this.serverReference = serverReference;
@@ -31,22 +33,36 @@ public class Connection implements Runnable {
     public void run(){
         String line;
         try {
-            in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            out = new PrintWriter(client.getOutputStream(), true);
+            readerIn = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            printOut = new PrintWriter(client.getOutputStream(), true);
         } catch (IOException e) {
             System.out.println("in or out failed");
             System.exit(-1);
         }
         running = true;
-        this.sendOverConnection("OK Welcome to the chat server, there are currelty " + serverReference.getNumberOfUsers() + " user(s) online");
+        this.sendOverConnection("OK Welcome to the chat server, there are currently " + serverReference.getNumberOfUsers() + " user(s) online");
         while(running) {
             try {
-                line = in.readLine();
+                line = readerIn.readLine();
                 validateMessage(line);
             } catch (IOException e) {
                 System.out.println("Read failed");
                 System.exit(-1);
             }
+        }
+    }
+    
+    public void messageHandling() {
+        String messageString;
+        try {
+            dis = new DataInputStream(client.getInputStream());
+            while(true) {
+                messageString = dis.readUTF();
+                System.out.println("Client says " + dis.readUTF());
+            }
+        } catch (IOException e) {
+            System.out.println("in or out failed");
+            System.exit(-1);
         }
     }
 
@@ -202,7 +218,7 @@ public class Connection implements Runnable {
     }
 
     private synchronized void sendOverConnection (String message){
-        out.println(message);
+        printOut.println(message);
     }
 
     public void messageForConnection (String message){
@@ -210,6 +226,7 @@ public class Connection implements Runnable {
     }
 
     public int getState() {
+        stat();
         return state;
     }
 
