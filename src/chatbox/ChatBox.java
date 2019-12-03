@@ -5,19 +5,28 @@
  */
 package chatbox;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 /**
  *
  * @author ZhengKhai
+ * @author LooiWengHoong
  */
 public class ChatBox {
 
     private ServerSocket server;
     private ArrayList<Connection> list;
+    private Socket s;
+    private Set<String> userNames = new HashSet<>();
+    private Set<Connection> userThreads = new HashSet<>();
 
     public ChatBox (int port) {
         try {
@@ -32,16 +41,31 @@ public class ChatBox {
         while(true) {
             Connection c = null;
             try {
-                c = new Connection(server.accept(), this);
-                System.out.println(c);
+                
+                s = server.accept();
+                System.out.println(s);
+                
+                DataInputStream dis = new DataInputStream(s.getInputStream());
+                DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+                
+                c = new Connection(s, this, dis, dos);
+                
+                Thread t = new Thread(c);
+                System.out.println("Adding new Client to active client list");
+                list.add(c);
+                
+                t.start();
+            } catch (Exception e) {
+                System.out.println(e);
             }
-            catch (IOException e) {
-                System.err.println("error setting up new client conneciton");
-                e.printStackTrace();
+        }
+    }
+    
+    public void broadcast(String message, Connection excludeUsersConnection) {
+        for (Connection clientHandler: list) {
+            if(clientHandler != excludeUsersConnection) {
+                clientHandler.sendMessages(message);
             }
-            Thread t = new Thread(c);
-            t.start();
-            list.add(c);
         }
     }
 
@@ -66,9 +90,8 @@ public class ChatBox {
     }
 
     public void broadcastMessage(String theMessage){
-        System.out.println(theMessage);
         for( Connection clientThread: list){
-            clientThread.messageForConnection(theMessage + System.lineSeparator());
+            clientThread.sendMessages(theMessage);
         }
     }
 

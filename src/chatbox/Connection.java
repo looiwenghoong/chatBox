@@ -1,6 +1,8 @@
 package chatbox;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -17,36 +19,76 @@ public class Connection implements Runnable {
     private int state;
     private Socket client;
     private ChatBox serverReference;
-    private BufferedReader in;
-    private PrintWriter out;
+    private BufferedReader readerIn;
+    private PrintWriter printOutWriter;
     private String username;
+    private DataInputStream dis;
+    private DataOutputStream dos;
 
-    Connection (Socket client, ChatBox serverReference) {
+    Connection (Socket client, ChatBox serverReference, DataInputStream dis, DataOutputStream dos) {
         this.serverReference = serverReference;
         this.client = client;
+        this.dis = dis;
+        this.dos = dos;
         this.state = STATE_UNREGISTERED;
         messageCount = 0;
     }
 
     public void run(){
         String line;
+        running = true;
+        
         try {
-            in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            out = new PrintWriter(client.getOutputStream(), true);
+            readerIn = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            printOutWriter = new PrintWriter(client.getOutputStream(), true);
+            
+            getNumberOfUsers();
+
+            do {            
+                String clientMessage = dis.readUTF();
+                System.out.println(clientMessage);
+                serverReference.broadcastMessage(clientMessage);
+            } while (running);
         } catch (IOException e) {
             System.out.println("in or out failed");
             System.exit(-1);
         }
-        running = true;
-        this.sendOverConnection("OK Welcome to the chat server, there are currelty " + serverReference.getNumberOfUsers() + " user(s) online");
-        while(running) {
-            try {
-                line = in.readLine();
-                validateMessage(line);
-            } catch (IOException e) {
-                System.out.println("Read failed");
-                System.exit(-1);
+        
+        
+        
+        
+        
+//        while(running) {
+//            try {
+//                line = dis.readUTF();
+//                System.out.println(line);
+////                validateMessage(line);
+//            } catch (IOException e) {
+//                System.out.println("Read failed");
+//                System.exit(-1);
+//            }
+//        }
+    }
+    
+    public void getNumberOfUsers() {
+        if(serverReference.getNumberOfUsers() == 0) {
+            printOutWriter.println("No other users connected");
+        } else {
+            printOutWriter.println("Currently " + serverReference.getNumberOfUsers() + " users online.");
+        }
+    }
+    
+    public void messageHandling() {
+        String messageString;
+        try {
+            dis = new DataInputStream(client.getInputStream());
+            while(true) {
+                messageString = dis.readUTF();
+                System.out.println("Client says " + dis.readUTF());
             }
+        } catch (IOException e) {
+            System.out.println("in or out failed");
+            System.exit(-1);
         }
     }
 
@@ -202,21 +244,26 @@ public class Connection implements Runnable {
     }
 
     private synchronized void sendOverConnection (String message){
-        out.println(message);
+        System.out.println(message);
     }
 
     public void messageForConnection (String message){
-        sendOverConnection(message);
+//        sendOverConnection(message);
+        System.out.println(message);
     }
 
     public int getState() {
+        stat();
         return state;
     }
 
     public String getUserName() {
         return username;
     }
-
+    
+    void sendMessages(String message) {
+        printOutWriter.println(message);
+    }
 }
 
 
