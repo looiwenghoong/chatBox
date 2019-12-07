@@ -25,8 +25,10 @@ public class ChatBox {
     private ServerSocket server;
     private ArrayList<Connection> list;
     private Socket s;
+    private Connection c = null;
     private Set<String> userNames = new HashSet<>();
     private Set<Connection> userThreads = new HashSet<>();
+    
 
     public ChatBox (int port) {
         try {
@@ -39,11 +41,9 @@ public class ChatBox {
         }
         list = new ArrayList<Connection>();
         while(true) {
-            Connection c = null;
+            
             try {
-                
                 s = server.accept();
-                System.out.println(s);
                 
                 DataInputStream dis = new DataInputStream(s.getInputStream());
                 DataOutputStream dos = new DataOutputStream(s.getOutputStream());
@@ -51,6 +51,7 @@ public class ChatBox {
                 c = new Connection(s, this, dis, dos);
                 
                 Thread t = new Thread(c);
+                System.out.println(c + " connected to the server");
                 System.out.println("Adding new Client to active client list");
                 list.add(c);
                 
@@ -59,15 +60,8 @@ public class ChatBox {
                 System.out.println(e);
             }
         }
-    }
+    }  
     
-    public void broadcast(String message, Connection excludeUsersConnection) {
-        for (Connection clientHandler: list) {
-            if(clientHandler != excludeUsersConnection) {
-                clientHandler.sendMessages(message);
-            }
-        }
-    }
 
     public ArrayList<String> getUserList() {
         ArrayList<String> userList = new ArrayList<String>();
@@ -94,6 +88,7 @@ public class ChatBox {
             clientThread.sendMessages(theMessage);
         }
     }
+    
 
     public boolean sendPrivateMessage(String message, String user) {
         for( Connection clientThread: list) {
@@ -122,6 +117,10 @@ public class ChatBox {
 
     protected void finalize() throws IOException{
         server.close();
+    }
+    
+    public String getConnectionID() {
+        return c.toString();
     }
     
 }

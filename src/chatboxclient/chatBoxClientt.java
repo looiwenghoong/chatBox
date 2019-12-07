@@ -23,7 +23,7 @@ public class chatBoxClientt extends javax.swing.JFrame {
 
     static ChatBoxClient client;
     public Boolean isLoggedIn = false;
-    public String LoginUsername = null;
+    public static String LoginUsername = null;
     public static String messageFromClient = "";
 
     /**
@@ -205,12 +205,8 @@ public class chatBoxClientt extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void submitTextButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_submitTextButtonMousePressed
-        if(LoginUsername == null) {
-            popUpLogin();
-        } else {
-            messageFromClient = submitMessageTextField.getText(); 
-            client.writeMessage(messageFromClient);
-        }
+        messageFromClient = submitMessageTextField.getText(); 
+        client.writeMessage(messageFromClient);
     }//GEN-LAST:event_submitTextButtonMousePressed
 
     private void sideMenuLoginButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sideMenuLoginButtonMousePressed
@@ -256,29 +252,13 @@ public class chatBoxClientt extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {                   
                 new chatBoxClientt().setVisible(true);
+                popUpLogin();
             }
         });
         client = new ChatBoxClient("127.0.0.1", 9000);
-        
-//        Thread readMessage = new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                client.readMessage();
-//            }
-//        });
-        
-//        Thread writeMessage = new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                client.writeMessage();
-//            }
-//        });
-        
-//        readMessage.start();
-//        writeMessage.start();
     }
     
-    private void popUpLogin() {
+    private static void popUpLogin() {
         JTextField usernameField = new JTextField("");
         JPanel panel = new JPanel(new GridLayout(0, 1));
         JLabel LoginTextLabel = new JLabel("Enter Username to Start Chatting");
@@ -291,7 +271,9 @@ public class chatBoxClientt extends javax.swing.JFrame {
         if (result == JOptionPane.OK_OPTION) {
             LoginUsername = usernameField.getText();
         } else {
-            System.out.println("Cancelled");
+            if(LoginUsername == null) {
+                popUpLogin();
+            }
         }
     }
 

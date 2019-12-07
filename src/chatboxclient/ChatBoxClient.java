@@ -39,27 +39,13 @@ public class ChatBoxClient {
     } 
     
     public void writeMessage(String msgString) {
-//        Scanner scn = new Scanner(System.in); 
         if(msgString != "") {
-//            String messageString = scn.nextLine();
             try {
                 output = new DataOutputStream(socket.getOutputStream());
                 output.writeUTF(msgString);
             } catch (Exception e) {
                 System.out.println(e);
             }   
-        }
-    }
-    
-    public void readMessage() {
-        while(true) {
-            try {
-                input = new DataInputStream(socket.getInputStream());
-                String msg = input.readUTF();
-                System.out.println(msg);
-            } catch (Exception e) {
-                System.out.println(e);
-            }
         }
     }
 }

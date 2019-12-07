@@ -43,6 +43,7 @@ public class Connection implements Runnable {
             printOutWriter = new PrintWriter(client.getOutputStream(), true);
             
             getNumberOfUsers();
+            broadcastConnectionIDToClient();
 
             do {            
                 String clientMessage = dis.readUTF();
@@ -53,21 +54,6 @@ public class Connection implements Runnable {
             System.out.println("in or out failed");
             System.exit(-1);
         }
-        
-        
-        
-        
-        
-//        while(running) {
-//            try {
-//                line = dis.readUTF();
-//                System.out.println(line);
-////                validateMessage(line);
-//            } catch (IOException e) {
-//                System.out.println("Read failed");
-//                System.exit(-1);
-//            }
-//        }
     }
     
     public void getNumberOfUsers() {
@@ -78,18 +64,8 @@ public class Connection implements Runnable {
         }
     }
     
-    public void messageHandling() {
-        String messageString;
-        try {
-            dis = new DataInputStream(client.getInputStream());
-            while(true) {
-                messageString = dis.readUTF();
-                System.out.println("Client says " + dis.readUTF());
-            }
-        } catch (IOException e) {
-            System.out.println("in or out failed");
-            System.exit(-1);
-        }
+    public void broadcastConnectionIDToClient() {
+         printOutWriter.println(serverReference.getConnectionID());
     }
 
     private void validateMessage(String message) {
