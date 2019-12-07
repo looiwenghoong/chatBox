@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/chatBox.iml" filepath="$PROJECT_DIR$/chatBox.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ServerChatBoxUI.iml" filepath="$PROJECT_DIR$/ServerChatBoxUI.iml" />
     </modules>
   </component>
 </project>
